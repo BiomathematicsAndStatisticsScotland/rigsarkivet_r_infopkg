@@ -13,7 +13,34 @@ label_factor <- function( x, factor_labels ) {
     return (x_factor)
 }
 
-## Label information from the FD.18005 table1.txt file
+## Variable descriptions from the FD.18005 table1.txt file, in a form usable by relabel_dataset
+fd_18005_r_labels = data.frame(
+    variable_name=c("child_id", "gender", "age", "weight_today", "weight_last_year",
+                    "height", "residence", "grade", "education", "start_date", "end_date",
+                    "hobby", "sport", "doctor_visit", "municipality", "heart_exam_time",
+                    "blood_pressure_time", "enrollment_time", "reason"),
+    description=c('Child ID. Unique non-meaningful identification number.',
+                  'Are you male or female?',
+                  'How old are you? (in years)',
+                  'What is your weight today? (in kilograms/kg)',
+                  'What was your weight at the beginning of last year? (in kilograms/kg)',
+                  'How tall are you? (in centimeters)',
+                  'Where do you live? (indicated by city name)',
+                  'Did you attend 10th grade in primary school?',
+                  'Have you taken one of the following upper secondary education programs (STX, HF, HHX, HTX)?',
+                  'Upper secondary education start date',
+                  'Upper secondary education end date',
+                  'What is your hobby?',
+                  'Which sport are you interested in?',
+                  'Doctor visit - date and time',
+                  'Name of the municipality where the survey takes place',
+                  'Time of heart examination',
+                  'Time of blood pressure measurement',
+                  'Time of enrollment in the "Health for All" program (date and time)',
+                  'Reason for further examination')
+)
+
+## Categorical variable data label information from the FD.18005 table1.txt file
 gender_levels=c('1'='Mand', '2'='Kvinde', '9'='uoplyst')
 
 grade_levels=c('1'='Ja', '2'='Nej', '9'='uoplyst')
@@ -55,4 +82,5 @@ fd_18005_r$education = label_factor(fd_18005_r$education, education_levels)
 fd_18005_r$hobby = label_factor(fd_18005_r$hobby, hobby_levels)
 
 ## Save as RData ready for inclusion in the package 
-save(fd_18005_r, file="RigsArkivetRInfoPkg/data/FD_18005.Rdata")
+save(fd_18005_r, fd_18005_r_labels, file="RigsArkivetRInfoPkg/data/FD_18005.Rdata")
+
