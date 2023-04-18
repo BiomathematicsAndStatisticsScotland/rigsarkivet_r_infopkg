@@ -34,8 +34,8 @@ load_all(file.path(source_directory,"RigsArkivetRInfoPkg"))
 pkg_output_dir=file.path(tempdir(), "FD.18005")
 
 pkg_info=list(
-    archive_index=file.path(source_directory, "RigsArkivetRInfoPkg", "inst", "extdata", "FD_18005_archiveIndex.xml"),
-    context_doc_index=file.path(source_directory, "RigsArkivetRInfoPkg", "inst", "extdata", "FD_18005_contextDocumentationIndex.xml"),
+    archive_index=system.file("extdata", "FD_18005_archiveIndex.xml", package="RigsArkivetRInfoPkg"),
+    context_doc_index=system.file("extdata", "FD_18005_contextDocumentationIndex.xml", package="RigsArkivetRInfoPkg"),
     pkg_id="FD.18005",
                   tables=list(
                       list(
