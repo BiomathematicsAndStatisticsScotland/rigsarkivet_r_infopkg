@@ -37,7 +37,8 @@ fd_18005_r_labels = data.frame(
                   'Time of heart examination',
                   'Time of blood pressure measurement',
                   'Time of enrollment in the "Health for All" program (date and time)',
-                  'Reason for further examination')
+                  'Reason for further examination'),
+    stringsAsFactors=FALSE
 )
 
 ## Categorical variable data label information from the FD.18005 table1.txt file
