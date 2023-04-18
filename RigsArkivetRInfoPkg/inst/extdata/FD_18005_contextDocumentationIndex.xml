@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<contextDocumentationIndex xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sa.dk/xmlns/diark/1.0 ../Schemas/standard/contextDocumentationIndex.xsd" xmlns="http://www.sa.dk/xmlns/diark/1.0">
+  <document>
+    <documentID>1</documentID>
+    <documentTitle>Afleveringsbestemmelse</documentTitle>
+    <documentDescription>Afleveringsbestemmelse udarbejdet af Rigsarkivet</documentDescription>
+    <documentDate>2019-11-28</documentDate>
+    <documentAuthor>
+      <authorName>Jens Jensen</authorName>
+      <authorInstitution>Rigsarkivet</authorInstitution>
+    </documentAuthor>
+    <documentCategory>
+      <submissionInformation>
+        <archivalProvisions>true</archivalProvisions>
+      </submissionInformation>
+    </documentCategory>
+  </document>
+  <document>
+    <documentID>2</documentID>
+    <documentTitle>Projektbeskrivelse</documentTitle>
+    <documentDescription>Beskriver formål med forskningsprojektet og indsamling af data.</documentDescription>
+    <documentCategory>
+      <researchInformation>
+        <researchProjectDescription>true</researchProjectDescription>
+      </researchInformation>
+    </documentCategory>
+  </document>
+  <document>
+    <documentID>3</documentID>
+    <documentTitle>Indsamlingsmetode</documentTitle>
+    <documentDescription>Beskriver metode anvendt til indsamling af data.</documentDescription>
+    <documentCategory>
+      <researchInformation>
+        <researchQuestionnaire>true</researchQuestionnaire>
+        <researchProtocol>true</researchProtocol>
+      </researchInformation>
+    </documentCategory>
+  </document>
+  <document>
+    <documentID>4</documentID>
+    <documentTitle>Datamanagementplan</documentTitle>
+    <documentDescription>Plan for håndtering og dokumentation af data i forskningsprojektet.</documentDescription>
+    <documentCategory>
+      <researchInformation>
+        <researchInformationOther>true</researchInformationOther>
+      </researchInformation>
+    </documentCategory>
+  </document>
+  <document>
+    <documentID>5</documentID>
+    <documentTitle>Protokol</documentTitle>
+    <documentCategory>
+      <researchInformation>
+        <researchProtocol>true</researchProtocol>
+      </researchInformation>
+    </documentCategory>
+  </document>
+  <document>
+    <documentID>6</documentID>
+    <documentTitle>Spørgeskema</documentTitle>
+    <documentDescription>Spørgeskema anvendt til indsamling af data.</documentDescription>
+    <documentCategory>
+      <researchInformation>
+        <researchQuestionnaire>true</researchQuestionnaire>
+      </researchInformation>
+    </documentCategory>
+  </document>
+  <document>
+    <documentID>7</documentID>
+    <documentTitle>Abstract</documentTitle>
+    <documentCategory>
+      <researchInformation>
+        <researchProjectDescription>true</researchProjectDescription>
+      </researchInformation>
+    </documentCategory>
+  </document>
+</contextDocumentationIndex>

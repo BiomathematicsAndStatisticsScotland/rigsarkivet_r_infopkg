@@ -1,0 +1,74 @@
+---
+title: "Building a Rigsarkivet Information Package for Statistical Data using R"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Building a Rigsarkivet Information Package for Statistical Data using R}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+# Introduction
+
+This tool is designed to emit an statistical information package
+described by [Annex 9 of Executive Order 128](https://en.rigsarkivet.dk/wp-content/uploads/2022/09/Executive-Order-on-Information-Packages128.pdf)
+suitable for testing with ASTA and then submission to the
+Rigsarkivet. 
+
+Prerequisites:
+
+* A contextDocumentationIndex.xml file
+* An archiveIndex.xml file
+* A data package identifier (FD.XXXXX)
+
+All of the above are supplied by the Rigsarkivet when you are invited
+to submit a data package.
+
+If you wish to test this package, the example FD.18005 data package
+can be used as a basis for recreation (and is the basis of the
+examples in this package
+ 
+# Installation
+
+The R package has been written for R version 3.6.0 and above.
+
+It is not currently available on CRAN - please see the Development
+section for install instructions
+
+## Development
+
+```{r, eval=FALSE}
+library(devtools)
+install_github("BiomathematicsAndStatisticsScotland/rigsarkivet_r_infopkg/RigsArkivetRInfoPkg")
+```
+
+To build the package you will need KnitR and Rmarkdown packages
+installed. Otherwise, base R will suffice
+
+# Basic usage, emitting files for use with ASTA
+
+# Basic usage, single R data frame
+
+# Advanced usage, multiple R data frames linked by key variables
+
+# Use of KODELISTE
+
+# Use of "User codes"/BRUGERKODE
+
+# Handling Context Documentation
+
+
+# TODO:
+
+Read in data from FD18005, write to RDS
+
+Construct another data frame referencing the 1st one
+
+Write testcases
+
+Check the pkg
+
+Publish to Github
+
+Convert the Interview transcripts
+
+We are done. 

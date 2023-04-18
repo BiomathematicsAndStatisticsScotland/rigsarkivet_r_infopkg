@@ -1,0 +1,30 @@
+Package: RigsArkivetRInfoPkg
+Title: Rigsarkivet Information Package for Statistical Data - A Creation Tool for R
+Version: 0.0.0.9000
+Date: 2023-04-07
+Authors@R: 
+    person(given = "David",
+           family = "Nutter",
+           role = c("aut", "cre"),
+           email = "david.nutter@bioss.ac.uk",
+           comment = c(ORCID = "0000-0003-2342-9574"))
+Description: This package is an aid to those submitting information
+   packages to the Danish National Archives (RigsArkivet). The tool
+   creates information packages from statistical data (R data frames)
+   that aim to be compliant with Executive Order 128 Annex 9. These
+   packages may then be tested with the Danish National Archives
+   "ASTA" tool and submitted to the archive. To operate this tool you
+   require an information package identifier, archiveIndex.xml file
+   and contextDocumentationIndex.xml file. All may be obtained from
+   the National Archives.
+NeedsCompilation: no
+License: BSD | file LICENSE
+Encoding: UTF-8
+LazyData: true
+Suggests: 
+   knitr,
+   roxygen2
+VignetteBuilder: knitr
+Depends:
+   R (>= 3.6.0)
+RoxygenNote: 6.1.1

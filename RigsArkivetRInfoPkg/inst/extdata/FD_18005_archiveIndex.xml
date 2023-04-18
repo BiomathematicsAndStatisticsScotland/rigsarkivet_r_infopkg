@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<archiveIndex xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xsi:schemaLocation="http://www.sa.dk/xmlns/diark/1.0 ../Schemas/standard/archiveIndex.xsd" xmlns="http://www.sa.dk/xmlns/diark/1.0">
+  <archiveInformationPackageID>AVID.SA.18005</archiveInformationPackageID>
+  <archiveInformationPackageIDPrevious>AVID.SA.11111</archiveInformationPackageIDPrevious>
+  <archivePeriodStart>1965-01-01</archivePeriodStart>
+  <archivePeriodEnd>2018-12-31</archivePeriodEnd>
+  <archiveInformationPacketType>true</archiveInformationPacketType>
+  <archiveCreatorList>
+    <creatorName>Københavns Universitet</creatorName>
+    <creationPeriodStart>1965-01-01</creationPeriodStart>
+    <creationPeriodEnd>2018-12-31</creationPeriodEnd>
+    <creatorName>Hans Hansen</creatorName>
+    <creationPeriodStart>1965-01-01</creationPeriodStart>
+    <creationPeriodEnd>2018-12-31</creationPeriodEnd>
+  </archiveCreatorList>
+  <archiveType>false</archiveType>
+  <archiveTypeClosedFiles>false</archiveTypeClosedFiles>
+  <systemName>Forskningsprojekt om generationer</systemName>
+  <alternativeName>Danish Longitudinal Research Study of Grandparents, Parents and Children</alternativeName>
+  <alternativeName>Generationsprojektet</alternativeName>
+  <systemPurpose>Formålet med forskningsprojektet om generationer er at undersøge sammenhængen mellem sundhed, intelligens (IQ) og arv. (Testdatasæt til Rigsarkivets eksempelafleveringspakke)</systemPurpose>
+  <systemContent>Centrale population: Studerende (og deres forældre og bedsteforældre). Centrale variable: vægt, højde, bopæl, uddannelse, hobby, sport, blødprøveresultat Univers: Bedsteforældre, forældre, børn Geografisk afgrænsning: National (Danmark).</systemContent>
+  <regionNum>false</regionNum>
+  <komNum>false</komNum>
+  <cprNum>false</cprNum>
+  <cvrNum>false</cvrNum>
+  <matrikNum>false</matrikNum>
+  <bbrNum>false</bbrNum>
+  <whoSygKod>false</whoSygKod>
+  <containsDigitalDocuments>false</containsDigitalDocuments>
+  <containsGeodata>false</containsGeodata>
+  <containsResearchData>true</containsResearchData>
+  <researchSIP>true</researchSIP>
+  <documentsDisposal>false</documentsDisposal>
+  <searchRelatedOtherRecords>false</searchRelatedOtherRecords>
+  <systemFileConcept>false</systemFileConcept>
+  <multipleDataCollection>false</multipleDataCollection>
+  <personalDataRestrictedInfo>true</personalDataRestrictedInfo>
+  <otherAccessTypeRestrictions>false</otherAccessTypeRestrictions>
+  <archiveApproval>SA</archiveApproval>
+</archiveIndex>
