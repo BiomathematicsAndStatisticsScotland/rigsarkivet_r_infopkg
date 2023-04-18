@@ -1,3 +1,6 @@
+## Constants and data
+DEFAULT_OPTION_SCIPEN=1000
+## End constants and data
 
 ## Sanitisation functions
 
@@ -93,7 +96,7 @@ default_sanitise_numeric <- function(col_name, x, float_precision_threshold = 1e
 #'
 #' See the vignette for details
 #' 
-#' @param df
+#' @param df The data frame to preprocess
 #' @param factors_to_codes If true, any factor variables will be
 #'     converted to their numeric equivalent. Used to ensure the
 #'     KODELIST contains the correct factor definitions when the
@@ -137,7 +140,7 @@ default_preprocess_dataset <- function (df,
 #' file can then be supplied to relabel_dataset to get the dataset
 #' ready for import
 #'
-#' @param df_desc
+#' @param df_desc A description of the dataset as returned by describe_dataset
 #' @param missing_labels_file
 #' @return A data frame containing the missing labels, such as would be written to missing_labels_file
 #' @export
@@ -246,8 +249,8 @@ ensure_directory <- function(file_path,
         }
     }
 
-    if (!is.directory(file_path)) {
-        msg=sprintf("Directory %s exists but is not a directory", file_path)
+    if (!dir.exists(file_path)) {
+        msg=sprintf("File %s is not a directory", file_path)
         if (warn_only) {
             warning(msg)
         } else {
@@ -387,7 +390,7 @@ emit_dataset <- function(df,
                          dataset_conn=stdout(),
                          factors_to_codes=TRUE,
                          preprocess_dataset=default_preprocess_dataset,
-                         option_scipen=1000) {
+                         option_scipen=DEFAULT_OPTION_SCIPEN) {
 
     old_options <- options(scipen=option_scipen)
     on.exit(options(old_options))
@@ -443,7 +446,7 @@ emit_dataset <- function(df,
 #' Creates "VARIABEL" the section of the table metadata file,
 #' including inferring appropriate types and if factors_to_codes is
 #' TRUE, links to the KODELISTE (see emit_kodeliste). Usually called by
-#' emit_metadata
+#' emit_metadata_file
 #'
 #' VARIABEL is described in Figure 9.4 and Section 9.I.4 in Executive Order 128
 #'
@@ -746,12 +749,24 @@ emit_kodeliste <- function(df, kodeliste_conn=stdout(), factors_to_codes = TRUE)
 #' dataset using ASTA
 #' 
 #' @param df The data frame whose metadata shall be emitted
-#' @param table_info A named list describing the table. See the example and the expected format, all documented below
-#' @param metadata_conn The connection or file to write the metadata file to. Default STDOUT
-#' @param factors_to_codes if true, factor variables will be converted to their numeric representation and KODELISTE will be emitted. Otherwise, the string equivalent of factor variables will be used in the main dataset and no KODELISTE will be produced
-#' @return a named list with names matching each of the sections of the metadata file
+#' @param table_info A named list describing the table. See the
+#'     example and the expected format, all documented below
+#' @param metadata_conn The connection or file to write the metadata
+#'     file to. Default STDOUT
+#' @param sanitise_numeric Function to sanitise numeric columns. By
+#'     default the function default_sanitise_numeric() is used
+#' @param sanitise_character Function to sanitise factors and
+#'     character columns. By default the function
+#'     default_sanitise_character() is used
+#' @param factors_to_codes if true, factor variables will be converted
+#'     to their numeric representation and KODELISTE will be
+#'     emitted. Otherwise, the string equivalent of factor variables
+#'     will be used in the main dataset and no KODELISTE will be
+#'     produced
+#' @return a named list with names matching each of the sections of
+#'     the metadata file
 #' @examples
-#' \dontrun {
+#' \dontrun{
 #' df = cbind(data.frame(model=rownames(mtcars)), mtcars)
 #' 
 #' emit_metadata_file(df,
@@ -771,13 +786,26 @@ emit_kodeliste <- function(df, kodeliste_conn=stdout(), factors_to_codes = TRUE)
 #'
 #' table_info is a named list with the following parameters:
 #'
-#' * name - the human-readable short name of the dataset
-#' * key_variable - character vector denoting the key (identifying) variables
-#' * description - a paragraph of text describing what the dataset contains
-#' * table_dataset - a data frame, connection or filename, the latter two options should allow the dataset to be read in as RDS format. Data labels are stored on each column in the "label" attribute
-#' * user_codes - a named list of variables in df with a list of codes for missing data in that variable. Optional. See the "format of user codes" section below
-#' * reference - a list containing further named list which contain references to other tables in this information package. The cross-table reference format is discussed below. Optional
-#' * label_file  - a file, connection or dataframe containing two columns "variable_name" and "label" allowing data labels to be set on all variables in table_dataset. Optional. 
+#' name
+#' :the human-readable short name of the dataset
+#' 
+#' key_variable
+#' :character vector denoting the key (identifying) variables
+#' 
+#' description
+#' :a paragraph of text describing what the dataset contains
+#' 
+#' table_dataset
+#' :a data frame, connection or filename, the latter two options should allow the dataset to be read in as RDS format. Data labels are stored on each column in the "label" attribute
+#' 
+#' user_codes
+#' :a named list of variables in df with a list of special codes for missing data in that variable. Optional. See the "format of user codes" section below
+#' 
+#' reference
+#' :a list containing further named list which contain references to other tables in this information package. The cross-table reference format is discussed below. Optional
+#' 
+#' label_file
+#' :a file, connection or dataframe containing two columns "variable_name" and "description" allowing descriptive labels to be set on all variables in table_dataset using the function relabel_dataset. Optional. 
 #' 
 #' @section Format of cross-table references
 #'
@@ -785,9 +813,15 @@ emit_kodeliste <- function(df, kodeliste_conn=stdout(), factors_to_codes = TRUE)
 #' describing a cross-table reference. These lists contain the
 #' following parameters:
 #' 
-#' * other_dataset - the "name" used in the table_info definition of the dataset this reference refers to in
-#' * other_key_variable - the name of a key variable in the other dataset
-#' * our_key_variable - the name of a key variable in this dataset
+#' other_dataset
+#' :the "name" used in the table_info definition of the dataset this reference refers to 
+#' 
+#' other_key_variable
+#' :the name of a key variable in the other dataset
+#' 
+#' our_key_variable
+#' :the name of a key variable in this dataset
+#' 
 #'
 #' other_key_variable and our_key_variable should be the same
 #' information (e.g. an ID number) and can thus be used to form a link
@@ -798,7 +832,7 @@ emit_kodeliste <- function(df, kodeliste_conn=stdout(), factors_to_codes = TRUE)
 #' declare that values ("C" and "F") in the "spray" column in the InsectSprays
 #' dataset represent missing data.
 #'
-#' \dontrun {
+#' \dontrun{
 #'   table_info=list(name="InsectSprays,
 #'                   description="The insect sprays dataset",
 #'                   ...
@@ -808,7 +842,12 @@ emit_kodeliste <- function(df, kodeliste_conn=stdout(), factors_to_codes = TRUE)
 #'
 #' @seealso relabel_dataset, emit_dataset, emit_variable_list, 
 #' @export
-emit_metadata_file <- function (df, table_info, metadata_conn=stdout(), factors_to_codes=FALSE) {
+emit_metadata_file <- function (df,
+                                table_info,
+                                metadata_conn=stdout(),
+                                sanitise_numeric=default_sanitise_numeric,
+                                sanitise_character=default_sanitise_character,
+                                factors_to_codes=FALSE) {
 
     file_opened = FALSE
     if (is.character(metadata_conn)) {        
@@ -848,7 +887,10 @@ emit_metadata_file <- function (df, table_info, metadata_conn=stdout(), factors_
 
     cat(paste(c("","VARIABELBESKRIVELSE",""), collapse=sep), file=output_conn)
 
-    var_desc = emit_variable_descriptions(df, output_conn)
+    var_desc = emit_variable_descriptions(df,
+                                          output_conn,
+                                          sanitise_numeric=sanitise_numeric,
+                                          sanitise_character=sanitise_character)
 
     cat(paste(c("","KODELISTE",""), collapse=sep), file=output_conn)
 
@@ -1064,18 +1106,32 @@ verify_named_list <- function(x, list_name, required_params, optional_params, sh
 #'     created if it is not already there. If FALSE an existing
 #'     package structure will simply be verified
 #' @param show_warnings If TRUE, warnings are shown rather than errors
-#' @return A named list describing the package structure created (as returned from verify_pkg_file_structure. 
-#' 
+#' @return A named list describing the package structure created (as
+#'     returned from verify_pkg_file_structure.
 #' 
 #' @section Package Description Format
 #'
-#' TODO: document this
+#' Describe your package in a named list with the following keys:
+#'
+#' archive_index
+#' :the path to an archiveIndex.xml file associated with your package. This is supplied by the Rigsarkivet
+#'
+#' context_doc_index
+#' :the path to a contextDocumentationIndex.xml file associated with your package. This is supplied by the Rigsarkivet
+#' 
+#' pkg_id
+#' :the package identifier as supplied by the Rigsarkivet (in the form FD.XXXXX). If not supplied, the tool will attempt to infer it from the pkg_dir parameter
+#' 
+#' tables
+#' :a list of tables in the dataset. These are discussed in the documentation for emit_metadata_file 
+#'
+#' @examples
+#'
+#' TODO: complete example to rebuild FD.18005
 #' 
 #' @seealso emit_metadata_file, verify_pkg_file_structure
 verify_pkg_description <- function(pkg_dir, package_description, create_structure=TRUE, show_warnings=TRUE) {
 
-    ## TODO: this will need a LOT of testing. 
-    
     required_toplevel_params = list(archive_index="character",
                                    context_doc_index="character",
                                    tables="list")
@@ -1086,8 +1142,9 @@ verify_pkg_description <- function(pkg_dir, package_description, create_structur
                              key_variable="character",
                              description="character",
                              table_dataset=c("character", "data.frame"))
-    optional_table_params = list(label_file="character",
-                             reference="list")    
+    optional_table_params = list(label_file=c("character", "data.frame"),
+                                 user_codes="list",
+                                 reference="list")    
     
     required_reference_params = list(other_dataset="character",
                                  other_key_variable="character",
@@ -1126,7 +1183,7 @@ verify_pkg_description <- function(pkg_dir, package_description, create_structur
                 names_ok = names_ok && this_ref_ok
             
                 ## Check that our_key_variable refers to a key variable in this table definition
-                ## N.B. this goes beyond ASTA requirements
+                ## N.B. this goes beyond ASTA requirements - this check should probably be performed when emitting data.
                 if (this_ref_ok) {
                     keys_by_other_dataset[reference_def$other_dataset] = list(reference_def$other_key_variable)
 
@@ -1147,9 +1204,11 @@ verify_pkg_description <- function(pkg_dir, package_description, create_structur
         }
     }
 
-    ## Check that other_dataset/other_key_variable refer to objects that exist in the description
-    ## N.B. this goes beyond ASTA requirements; the reference links
-    ## there only need to exist as variables, not as key variables.
+    ## Check that other_dataset/other_key_variable refer to objects
+    ## that exist in the description N.B. this goes beyond ASTA
+    ## requirements; the reference links there only need to exist as
+    ## variables, not as key variables. Really this check should be
+    ## performed when emitting data so we can check the full variable list. Maybe
     for (ref_dataset in names(keys_by_other_dataset)) {
         actual_keys=keys_by_dataset[[ref_dataset]]
         
@@ -1347,30 +1406,86 @@ check_for_missing_labels <- function( df_desc, missing_labels_file=NULL ) {
 #' Export the data frame provided "just like" the original ASTA R
 #' export script. Assuming the name provided to parameter f_name is
 #' "my_dataset" this will output 3, possibly 4 files:
+#'
+#' my_dataset.csv
+#' :a CSV file produced by emit_dataset
 #' 
-#' * my_dataset.csv - a CSV file produced by emit_dataset
-#' * my_dataset_VARIABEL.txt
-#' * my_dataset_VARIABELBESKRIVELSE.txt
-#' * my_dataset_KODELISTE.txt - the code list for all categorical/factor variables in the dataset. Only produced if there are categorical/factor variables and factors_to_codes = TRU
-process_as_asta_export_script <- function(df, f_name, output_dir=getwd(), factors_to_codes=TRUE){
+#' my_dataset_VARIABEL.txt
+#' :The variable list (with types and KODELISTE references)
+#' 
+#' my_dataset_VARIABELBESKRIVELSE.txt
+#' :The descriptions of each variable
+#' 
+#' my_dataset_KODELISTE.txt
+#' :the code list for all categorical/factor variables in the dataset. Only produced if there are categorical/factor variables and factors_to_codes = TRUE
+#'
+#' @param f_name A name to use as the basename for all the output files (see above)
+#' @param preprocess_dataset A function to preprocess the dataset to
+#'     remove or correct problem values. An example implementation is
+#'     provided in default_preprocess_dataset which should work for
+#'     many datasets. If not, customise it!
+#' @param sanitise_numeric Function to sanitise numeric columns. By
+#'     default the function default_sanitise_numeric() is used
+#' @param sanitise_character Function to sanitise factors and
+#'     character columns. By default the function
+#'     default_sanitise_character() is used
+#' @param option_scipen See emit_dataset for documentation of this parameter
+#' @param row_limit If set, the number of rows in parameter
+#'     df will be truncated to this value. This facilitates testing
+#' @param output_dir A directory in which to write the output
+#'     files. Defaults to current working directory
+#' @param factors_to_codes If true, any factor variables will be
+#'     converted to their numeric equivalent. Used to ensure the
+#'     VARIABEL list and KODELISTE contains the correct factor definitions when the
+#'     dataset is emitted. If FALSE factors will be emitted as their
+#'     text equivalent.
+#'
+#' @seealso emit_dataset, default_preprocess_dataset
+#' @export
+process_as_asta_export_script <- function(df,
+                                          f_name,
+                                          preprocess_dataset=default_preprocess_dataset,
+                                          sanitise_numeric=default_sanitise_numeric,
+                                          sanitise_character=default_sanitise_character,
+                                          option_scipen=DEFAULT_OPTION_SCIPEN,
+                                          row_limit=NULL,
+                                          output_dir=getwd(),
+                                          factors_to_codes=TRUE){
 
   if (options()$encoding!="UTF-8") {
       warning(sprintf("ASTA expects all files to be UTF-8 encoded. Running with encoding %s is unsupported", options()$encoding))
   }
     
+  df = load_and_truncate_dataset(df, row_limit)
+    
   ## Write out the dataset itself
-  emit_dataset(df, file.path(output_dir, paste0(f_name, ".csv")), factors_to_codes=factors_to_codes) 
+  emit_dataset(df,
+               file.path(output_dir,
+                         paste0(f_name, ".csv")),
+               factors_to_codes=factors_to_codes,               
+               preprocess_dataset=preprocess_dataset,
+               option_scipen=option_scipen) 
 
   ## Write the variable list
   ## N.B. this will write empty files which may not be what we want
   ## Could pass in filename and detect type inside the function (connection-or-filename)
-  emit_variable_list(df, file.path(output_dir, paste0(f_name, "_", "VARIABEL.txt")), factors_to_codes=factors_to_codes)
+  emit_variable_list(df,
+                     file.path(output_dir, paste0(f_name, "_", "VARIABEL.txt")),
+                     factors_to_codes=factors_to_codes)
 
   ## Write the variable descriptions file
-  emit_variable_descriptions(df, file.path(output_dir, paste0(f_name, "_", "VARIABELBESKRIVELSE.txt")))
+  emit_variable_descriptions(df,
+                             file.path(output_dir,
+                                       paste0(f_name, "_", "VARIABELBESKRIVELSE.txt")
+                                       ),
+                             sanitise_numeric=sanitise_numeric,
+                             sanitise_character=sanitise_character)
 
   ## Write the code list
-  emit_kodeliste(df, file.path(output_dir, paste0(f_name, "_", "KODELISTE.txt")), factors_to_codes=factors_to_codes)    
+  emit_kodeliste(df,
+                 file.path(output_dir,
+                           paste0(f_name, "_", "KODELISTE.txt")),
+                 factors_to_codes=factors_to_codes)    
   
   message(sprintf("Data processing succesfully completed - emitted dataset of %d rows with %d variables", nrow(df), ncol(df)))
   
@@ -1387,15 +1502,29 @@ process_as_asta_export_script <- function(df, f_name, output_dir=getwd(), factor
 #'     to create, as discussed in the documentation for
 #'     verify_pkg_description
 #' @param output_dir Where to write the finished package
+#' @param preprocess_dataset A function to preprocess the dataset to
+#'     remove or correct problem values. An example implementation is
+#'     provided in default_preprocess_dataset which should work for
+#'     many datasets. If not, customise it!
+#' @param sanitise_numeric Function to sanitise numeric columns. By
+#'     default the function default_sanitise_numeric() is used
+#' @param sanitise_character Function to sanitise factors and
+#'     character columns. By default the function
+#'     default_sanitise_character() is used
+#' @param option_scipen See emit_dataset for documentation of this parameter
 #' @param row_limit If set, the number of rows all dataset(s) in
 #'     pkg_description will be truncated to. This facilitates testing
 #' @param factors_to_codes if TRUE all factors/categorical variables
 #'     will be converted to their numeric representation and KODELISTE
 #'
-#' @seealso verify_pkg_description 
+#' @seealso verify_pkg_description, emit_dataset
 #' @export
 process_full_info_pkg <- function (pkg_description,
                                    output_dir=getwd(),
+                                   preprocess_dataset=default_preprocess_dataset,
+                                   sanitise_numeric=default_sanitise_numeric,
+                                   sanitise_character=default_sanitise_character,
+                                   option_scipen=DEFAULT_OPTION_SCIPEN,
                                    row_limit=NULL,
                                    factors_to_codes=TRUE) {
 
@@ -1439,8 +1568,18 @@ process_full_info_pkg <- function (pkg_description,
         check_for_missing_labels( df_description,
                                  file.path(table_dir, sprintf("%s_missing_labels.csv", table$name) )) 
 
-        emit_dataset(table_data, table_file, factors_to_codes)
-        emit_metadata_file(table_data, table, table_metadata_file, factors_to_codes)
+        emit_dataset(table_data,
+                     table_file,
+                     factors_to_codes=factors_to_codes,
+                     preprocess_dataset=preprocess_dataset,
+                     option_scipen=option_scipen)
+        
+        emit_metadata_file(table_data,
+                           table_info=table,
+                           metadata_conn=table_metadata_file,
+                           sanitise_numeric=sanitise_numeric,
+                           sanitise_character=sanitise_character,
+                           factors_to_codes=factors_to_codes)
         
         table_count=table_count+1
         message(sprintf("Wrote %s to directory %s", table$name, table_dir))
