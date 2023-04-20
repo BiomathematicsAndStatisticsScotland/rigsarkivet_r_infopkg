@@ -49,7 +49,7 @@ RigsArkivetRInfoPkg source directory:
                                            hobby=c('8')
                                           ),                          
                           key_variable=c("child_id"),
-                          description="Danish Longitudinal Research Study of Grandparents, Parents and Children - this is data 1 ",
+                          description="Danish Longitudinal Research Study of Grandparents, Parents and Children - this is data 1",
                           table_dataset=fd_18005_r)))
 
     process_full_info_pkg(pkg_description,
@@ -63,13 +63,13 @@ gender, grade, education, hobby and so on are transformed into R
 factors which results in the numeric values for these fields changing
 when re-emitted as a dataset.
 
-A simple command-line tool is available which emits a single RDS file
-as an information package. See Convert_To_ASTA.R in the Github
-repository for this. 
+Additionally, a simple command-line tool is available which emits a
+single RDS file as an information package. See ASTA_Convert.R in the
+Github repository.
 
 For more complex invocations (e.g. where multiple data tables are
 involved) it is recommended to write a script which contains the
-description of your information package as above.
+description of your information package as shown in the example above.
 
 The package vignette contains further examples of how to use this
 software to emit more complex information packages. 
@@ -96,6 +96,10 @@ cleanup and so on.
 
 It is recommended to write a new function which encapsulates a call to
 default_preprocess_dataset as there's a lot of useful logic which you
-will probably want to reuse. 
+will probably want to reuse, in addition to any extra cleaning logic
+you may wish to add.
+
+You can of course "pre-clean" your dataset yourself. It is entirely up
+to you.
 
 
