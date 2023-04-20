@@ -1,5 +1,6 @@
 ## Constants and data
 DEFAULT_OPTION_SCIPEN=1000
+PKG_PATTERN="FD.(\\d+)"
 ## End constants and data
 
 ## Sanitisation functions
@@ -1304,8 +1305,6 @@ verify_pkg_file_structure <- function(pkg_dir,
                                       archive_index=NULL,
                                       context_doc_index=NULL,
                                       create_structure=TRUE) {
-
-    PKG_PATTERN="FD.(\\d+)"
     candidate_pkg_id = basename(pkg_dir)
     if (length(grep(PKG_PATTERN, candidate_pkg_id)) > 0 ) {
         if (!is.null(pkg_id) && pkg_id!=candidate_pkg_id) {
