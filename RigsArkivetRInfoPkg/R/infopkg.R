@@ -1,4 +1,7 @@
 ## Constants and data
+#' @include sql_reserved_words.R
+NULL
+
 DEFAULT_OPTION_SCIPEN=1000
 PKG_PATTERN="FD.(\\d+)"
 ## End constants and data
@@ -624,9 +627,9 @@ emit_variable_list <- function (df, variabel_conn=stdout(), factors_to_codes=TRU
 #' @return a dataframe containing the variable descriptions
 #' @export
 emit_variable_descriptions <- function(df,
-                                         description_conn=stdout(),
-                                         sanitise_numeric=default_sanitise_numeric,
-                                         sanitise_character=default_sanitise_character) {
+                                       description_conn=stdout(),
+                                       sanitise_numeric=default_sanitise_numeric,
+                                       sanitise_character=default_sanitise_character) {
     
     ## Extract variable description
     col_lbl_list <- sapply(df, function(x) attributes(x)$label)
@@ -634,11 +637,19 @@ emit_variable_descriptions <- function(df,
     ## Remove variables with no label available
     col_lbl_list <- col_lbl_list[!sapply(col_lbl_list, is.null)]
 
-    ## TODO: warn of variable names with 'bad' characters in them
+    ## Warn of variable names with 'bad' characters in them
     ## (primarily quotes). The caller must address this issue.    
     ## Exec order 128 states variable/column names must comply with
     ##   ISO/IEC 9075:1999 - Database Language SQL (SQL-99)
     ## and escaping isn't allowed
+    bad_names = as.character(Filter(Negate(is.null),
+                                    sapply(colnames(df),
+                                           function (x) { if (toupper(x) %in% SQL99_RESERVED_WORDS) { return(x) }})))
+
+    if (length(bad_names) > 0) {
+        warning(sprintf("Variable names %s conflict with reserved words in SQL99",
+                paste(bad_names, collapse=",")))
+    }  
 
     ## Finally sanitise the variable labels themselves
     col_lbl_list <- sanitise_character("Variable Labels", col_lbl_list)
@@ -1131,7 +1142,38 @@ verify_named_list <- function(x, list_name, required_params, optional_params, sh
 #'
 #' @examples
 #'
-#' TODO: complete example to rebuild FD.18005
+#' ```{r, eval=FALSE}
+#' library(RigsArkivetRInfoPkg)
+#' pkg_output_dir=tempdir()
+#' pkg_descroption = list(
+#'     archive_index=system.file("extdata", "FD_18005_archiveIndex.xml", package="RigsArkivetRInfoPkg"),
+#'     context_doc_index=system.file("extdata", "FD_18005_contextDocumentationIndex.xml", package="RigsArkivetRInfoPkg"),
+#'     pkg_id="FD.18005",
+#'                  tables=list(
+#'                     list(
+#'                       name="R_testfil",
+#'                          label_file=fd_18005_r_labels,                             
+#'                          key_variable=c("child_id"),
+#'                          description="Danish Longitudinal Research Study of Grandparents, Parents and Children - this is data 1",
+#'                          table_dataset=fd_18005_r,
+#'                          reference=list(
+#'                              list(
+#'                                  other_dataset="childrens_pets",
+#'                                  other_key_variable="child_id",
+#'                                  our_key_variable="child_id")
+#'                              )
+#'			),
+#'		       list(
+#'                          name="childrens_pets",
+#'                          label_file=example_table2_labels,
+#'                          key_variable=c("pet_id"),
+#'                          description="Childrens' pets, to provide a simple example of a 2nd table",
+#'                          table_dataset=example_table2)))
+#'
+#'  process_full_info_pkg(pkg_description,
+#'                          output_dir = pkg_output_dir)   
+#' ```
+#' 
 #' 
 #' @seealso emit_metadata_file, verify_pkg_file_structure
 verify_pkg_description <- function(pkg_dir, package_description, create_structure=TRUE, show_warnings=TRUE) {

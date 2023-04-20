@@ -28,3 +28,6 @@ VignetteBuilder: knitr
 Depends:
    R (>= 3.6.0)
 RoxygenNote: 6.1.1
+Collate: 
+    'sql_reserved_words.R'
+    'infopkg.R'
