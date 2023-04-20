@@ -399,7 +399,10 @@ emit_dataset <- function(df,
     ## Warn the user what is happening with decimals. Note that
     ## default_sanitise_numeric will also censor certain very small,
     ## precise values as ASTA doesn't like those either. 
-    message(sprintf("Decimals wider than %d digits will be printed in exponential form. This will result in an ASTA error as Exec Order 128 requires decimals be printed without exponentation. If so, modify option_scipen or filter your dataset to remove such values. A custom sanitise_numeric function will also help", option_scipen))
+    message(sprintf("NOTE: Decimals wider than %d digits will be printed in exponential form.
+      This will result in an ASTA error as Exec Order 128 requires decimals be printed
+      without exponentation. If so, modify option_scipen or filter your dataset to remove
+      such values. A custom sanitise_numeric function will also help", option_scipen))
     
             
     df_csv <- preprocess_dataset(df, factors_to_codes=factors_to_codes)
@@ -1183,49 +1186,21 @@ verify_pkg_description <- function(pkg_dir, package_description, create_structur
 
                 names_ok = names_ok && this_ref_ok
             
-                ## Check that our_key_variable refers to a key variable in this table definition
-                ## N.B. this goes beyond ASTA requirements - this check should probably be performed when emitting data.
                 if (this_ref_ok) {
-                    keys_by_other_dataset[reference_def$other_dataset] = list(reference_def$other_key_variable)
-
-                    
-                    if (!reference_def$our_key_variable %in% table_def$key_variable) {
-                        names_ok=FALSE
-                        if (showWarning) {
-                            warning(sprintf("Reference from '%s' to '%s': our_key_variable '%s' is not present in key variables list '%s'",
-                                            table_def$name,
-                                            reference_def$other_dataset,
-                                            reference_def$our_key_variable,
-                                            paste(table_def$key_variable, collapse=",")))
-                        }
-                    }
+                     keys_by_other_dataset[reference_def$other_dataset] =
+                         list(reference_def$other_key_variable)
+                   
                 }
             }
             
         }
     }
 
-    ## Check that other_dataset/other_key_variable refer to objects
-    ## that exist in the description N.B. this goes beyond ASTA
-    ## requirements; the reference links there only need to exist as
-    ## variables, not as key variables. Really this check should be
-    ## performed when emitting data so we can check the full variable list. Maybe
+    ## Check that other_dataset refers to a table that exists in the
+    ## package description
     for (ref_dataset in names(keys_by_other_dataset)) {
-        actual_keys=keys_by_dataset[[ref_dataset]]
-        
-        if (!is.null(actual_keys)) {
-            other_keys = keys_by_other_dataset[[ref_dataset]]
-            if (! (other_keys %in% actual_keys)) {
-                names_ok=FALSE
-                if (show_warnings) {
-                    warning(sprintf("other_key_variable '%s' is not present in keys for dataset '%s' which are: '%s'",
-                                    other_keys,
-                                    ref_dataset,
-                                    paste(actual_keys, collapse=",")))
-                                    
-                }
-            }
-        } else {
+        actual_keys=keys_by_dataset[[ref_dataset]]       
+        if (is.null(actual_keys)) {
             names_ok=FALSE
             if (show_warnings) {
                 warning(sprintf("other_dataset '%s' is not a named dataset in the table list", ref_dataset))
@@ -1236,7 +1211,6 @@ verify_pkg_description <- function(pkg_dir, package_description, create_structur
     if (!names_ok) {
         stop("Package definition is invalid. Please correct any errors and retry")
     }
-    
     
     return(verify_pkg_file_structure(pkg_dir,
                                      pkg_id = package_description$pkg_id,
@@ -1537,9 +1511,14 @@ process_full_info_pkg <- function (pkg_description,
 
     ## Clear out old data and setup data directory with new tables
     cleanup_data_dir(verified_pkg$data_dir)
+
+    ##reference-counting variables
+    variables_by_table=list()
+    references_ok=TRUE
+    
     
     table_count=1
-    ## For each table, export the data and related metadata file
+    ## For each table, export the data and related metadata file 
     for (table in pkg_description$tables) {        
         table_name = sprintf("table%d", table_count)
         table_dir = file.path(verified_pkg$data_dir, table_name)
@@ -1553,7 +1532,11 @@ process_full_info_pkg <- function (pkg_description,
 
         
         table_data = load_and_truncate_dataset(table$table_dataset,
-                                               row_limit)           
+                                               row_limit)
+
+        ## Store our variable list for later
+        variables_by_table[table$name] = list(colnames(table_data))
+        
         table_data = relabel_dataset( table_data, table$label_file)
 
         for (key_var in table$key_variable) {
@@ -1582,6 +1565,47 @@ process_full_info_pkg <- function (pkg_description,
         
         table_count=table_count+1
         message(sprintf("Wrote %s to directory %s", table$name, table_dir))
+    }
+
+    #browser()
+    
+    ## Check our references
+    for (table in pkg_description$tables) {
+        for (reference_def in table$reference) {
+            ## Check our key variable exists
+            our_vars = variables_by_table[[table$name]]
+            if (!reference_def$our_key_variable %in% our_vars) {
+                references_ok=FALSE
+
+                warning(sprintf("Reference from '%s' to '%s': our_key_variable '%s' is not present in columns of %s",
+                                table$name,
+                                reference_def$other_dataset,
+                                reference_def$our_key_variable,
+                                table$name))
+                
+            }
+
+            ## Check our target reference exists in the other table
+            other_vars = variables_by_table[[reference_def$other_dataset]]
+            if (!is.null(other_vars)) {
+                if (! (reference_def$other_key_variable %in% other_vars)) {
+                    references_ok=FALSE
+                    warning(sprintf("Reference from '%s' to '%s' other_key_variable '%s' is not present in variables for dataset '%s' ",
+                                    table$name,
+                                    reference_def$other_dataset,
+                                    reference_def$other_key_variable,
+                                    reference_def$other_dataset))
+                }
+            } else {
+                ## This error should already have been caught but we check again to be sure
+                warning(sprintf("other_dataset '%s' is not a named dataset in the table list", ref_dataset))
+                references_ok=FALSE
+            }
+        }
+    }
+
+    if (!references_ok) {
+        stop("Invalid relationships between datasets have been detected. See the warnings for details")
     }
     
 }
