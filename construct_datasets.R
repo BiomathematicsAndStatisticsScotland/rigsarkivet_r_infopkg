@@ -71,6 +71,14 @@ fd_18005_r=read.csv("RigsArkivetRInfoPkg/inst/extdata/FD_18005_table1.csv",
                     stringsAsFactors=FALSE,
                     sep=";")
 
+## Read in the additional data CSV file (used for constructing a multi-table dataset)
+example_table2=read.csv("RigsArkivetRInfoPkg/inst/extdata/example_table2_data.csv",
+                    stringsAsFactors=TRUE,
+                    sep=";")
+example_table2_labels=read.csv("RigsArkivetRInfoPkg/inst/extdata/example_table2_labels.csv",
+                    stringsAsFactors=FALSE,
+                    sep=";")
+
 ## Add in the levels for all the categorical variables. N.B. R doesn't
 ## really "do" labels in the same way as SAS/STATA/SPSS so though the
 ## data will be preserved the numeric values in the original FD.18005
@@ -83,7 +91,10 @@ fd_18005_r$education = label_factor(fd_18005_r$education, education_levels)
 fd_18005_r$hobby = label_factor(fd_18005_r$hobby, hobby_levels)
 
 ## Save as RData ready for inclusion in the package 
-save(fd_18005_r, fd_18005_r_labels, file="RigsArkivetRInfoPkg/data/FD_18005.Rdata")
+save(fd_18005_r, fd_18005_r_labels,
+     example_table2, example_table2_labels,
+     file="RigsArkivetRInfoPkg/data/FD_18005.Rdata")
 
 ## Also save as RDS, since we use these for examples
-saveRDS(fd_18005_r, file="RigsArkivetRInfoPkg/inst/extdata/FD_18005_table1.RDS") 
+saveRDS(fd_18005_r, file="RigsArkivetRInfoPkg/inst/extdata/FD_18005_table1.RDS")
+saveRDS(example_table2, file="RigsArkivetRInfoPkg/inst/extdata/example_table2.RDS") 

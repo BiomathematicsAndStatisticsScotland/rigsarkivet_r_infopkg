@@ -1,0 +1,4 @@
+variable_name;description
+pet_id;Unique identifier for the pet
+child_id;Identifier of the child who owns the pet
+pet;The type of the pet
