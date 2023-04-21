@@ -93,7 +93,7 @@ fd_18005_r$hobby = label_factor(fd_18005_r$hobby, hobby_levels)
 ## Save as RData ready for inclusion in the package 
 save(fd_18005_r, fd_18005_r_labels,
      example_table2, example_table2_labels,
-     file="RigsArkivetRInfoPkg/data/FD_18005.Rdata")
+     file="RigsArkivetRInfoPkg/data/FD_18005.RData")
 
 ## Also save as RDS, since we use these for examples
 saveRDS(fd_18005_r, file="RigsArkivetRInfoPkg/inst/extdata/FD_18005_table1.RDS")
