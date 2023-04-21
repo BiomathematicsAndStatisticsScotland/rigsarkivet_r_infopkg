@@ -1,9 +1,12 @@
 # R package for creating statistical information packages to fulfil requirements of Executive Order 128
 
-This package can construct statistical information packages for
-submission to the Danish National Archives (Rigsarkivet). You require
-a package identifier and metadata files from the Rigsarkivet to do
-this. 
+This UNOFFICIAL package can construct statistical information packages
+for submission to the Danish National Archives (Rigsarkivet). You
+require a package identifier and metadata files from the Rigsarkivet
+to do this.
+
+This package is NOT ENDORSED BY THE RIGSARKIVET. However, it may be
+helpful. 
 
 ## Installation
 

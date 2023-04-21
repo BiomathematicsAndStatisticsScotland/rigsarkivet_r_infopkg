@@ -9,10 +9,12 @@ vignette: >
 
 # Introduction
 
-This tool is designed to emit an statistical information package
+This tool is designed to emit an statistical Information Package
 described by [Annex 9 of Executive Order 128](https://en.rigsarkivet.dk/wp-content/uploads/2022/09/Executive-Order-on-Information-Packages128.pdf)
 suitable for testing with ASTA and then submission to the
 Rigsarkivet. 
+
+THIS PACKAGE IS UNOFFICIAL AND NOT ENDORSED BY THE RIGSARKIVET!
 
 Prerequisites:
 
@@ -36,39 +38,200 @@ section for install instructions
 
 ## Development
 
-```{r, eval=FALSE}
+```{r eval=FALSE}
 library(devtools)
 install_github("BiomathematicsAndStatisticsScotland/rigsarkivet_r_infopkg/RigsArkivetRInfoPkg")
 ```
 
 To build the package you will need KnitR and Rmarkdown packages
-installed. Otherwise, base R will suffice
+installed. For subsequent use, base R will suffice. 
 
 # Basic usage, emitting files for use with ASTA
 
+ASTA expects to take one or more datasets exported in a specific
+format and guides the user through the process of combining them into
+an information package. 
+
+You can export your dataset(s) in this way as follows, using the
+fd_18005_r example dataframe shipped with the package:
+
+```{r eval=FALSE}
+library(RigsArkivetRInfoPkg)
+process_as_asta_export_script(fd_18005_r, 
+                              "my_dataset",
+                              output_dir=tempdir(),
+                              factors_to_codes=TRUE)
+```
+
+This will output 3, possibly four files:
+
+my_dataset.csv
+:a CSV file containing the data
+ 
+my_dataset_VARIABEL.txt
+:The variable list (with types and KODELISTE references)
+ 
+my_dataset_VARIABELBESKRIVELSE.txt
+:The descriptions of each variable
+ 
+my_dataset_KODELISTE.txt
+:the code list for all categorical/factor variables in the dataset. Only produced if there are categorical/factor variables and factors_to_codes = TRUE
+
 # Basic usage, single R data frame
+
+It is also possible to export a complete data package, ready for
+testing with ASTA. Here's a simple example for a single data frame,
+using data contained in the RigsArkivetRInfoPkg package:
+
+```{r eval=FALSE}
+    library(RigsArkivetRInfoPkg)
+
+    pkg_output_dir=tempdir()
+
+    pkg_description = list(
+     archive_index=system.file("extdata", "FD_18005_archiveIndex.xml", package="RigsArkivetRInfoPkg"),
+     context_doc_index=system.file("extdata", "FD_18005_contextDocumentationIndex.xml", package="RigsArkivetRInfoPkg"),
+     pkg_id="FD.18005",
+                   tables=list(
+                       list(
+                          name="R_testfil",
+                          label_file=fd_18005_r_labels,                             
+                          key_variable=c("child_id"),
+                          description="Danish Longitudinal Research Study of Grandparents, Parents and Children - this is data 1",
+                          table_dataset=fd_18005_r)))
+    process_full_info_pkg(pkg_description,
+                          output_dir = pkg_output_dir)   
+```
+
+This will emit the entire data package into the directory
+pkg_output_dir. Note that there will be some warnings about context
+documentation when doing this as I do not ship all the contents of
+FD.18005. See "Handling Context Documentation" later in this
+document for a discussion of the issues here. 
+
+You can then take the emitted package and test it in ASTA. 
 
 # Advanced usage, multiple R data frames linked by key variables
 
+For non-trivial datasets you will have multiple datasets linked by
+variable references. The Information Package specification supports this
+
+```{r eval=FALSE}
+    library(RigsArkivetRInfoPkg)
+
+    pkg_output_dir=tempdir()
+
+    pkg_description = list(
+    archive_index=system.file("extdata", "FD_18005_archiveIndex.xml", package="RigsArkivetRInfoPkg"),
+    context_doc_index=system.file("extdata", "FD_18005_contextDocumentationIndex.xml", package="RigsArkivetRInfoPkg"),
+    pkg_id="FD.18005",
+    tables=list(
+        list(
+            name="R_testfil",
+            label_file=fd_18005_r_labels,                             
+            key_variable=c("child_id"),
+            description="Danish Longitudinal Research Study of Grandparents, Parents and Children - this is data 1",
+            table_dataset=fd_18005_r,
+            reference=list(
+                list(
+                    other_dataset="childrens_pets",
+                    other_key_variable="child_id",
+                    our_key_variable="child_id")
+            )
+        ),
+        list(
+            name="childrens_pets",
+            label_file=example_table2_labels,
+            key_variable=c("pet_id"),
+            description="Childrens' pets, to provide a simple example of a 2nd table",
+            table_dataset=example_table2)))
+
+    process_full_info_pkg(pkg_description,
+                          output_dir = pkg_output_dir)
+```
+
 # Use of KODELISTE
+
+The option factors_to_codes determines whether a KODELISTE section is
+emitted. If you choose to emit KODELISTE:
+
+* All factor variables will be converted to their numeric (integer)
+  equivalents
+* The textual representation will be used to generate the KODELISTE 
 
 # Use of "User codes"/BRUGERKODE
 
+It is possible to specify user codes for fields in your data that have
+specific values with specific meaning (e.g. different kinds of missing
+data). A simple example is given below, which indicates that certain
+codes in each of the fields in our example dataset actually indicate
+missing data.
+
+NOTE: these user codes are DIFFERENT to the original FD.18005
+information package due to coercion of these variables to an R factor
+(which doesn't preserve code values and ignores levels which do not
+exist in the data)
+
+```{r eval=FALSE}
+pkg_output_dir=file.path(tempdir(), "FD.18005")
+
+pkg_info=list(
+    archive_index=system.file("extdata", "FD_18005_archiveIndex.xml", package="RigsArkivetRInfoPkg"),
+    context_doc_index=system.file("extdata", "FD_18005_contextDocumentationIndex.xml", package="RigsArkivetRInfoPkg"),
+    pkg_id="FD.18005",
+                  tables=list(
+                      list(
+                          name="R_testfil",
+                          label_file=fd_18005_r_labels,
+                          user_codes=list( gender='3',
+                                           grade='3',
+                                           education='6',
+                                           hobby=c('8')
+                                          ),                          
+                          key_variable=c("child_id"),
+                          description="Danish Longitudinal Research Study of Grandparents, Parents and Children - this is data 1 ",
+                          table_dataset=fd_18005_r))
+)
+
+
+process_full_info_pkg(pkg_info,
+                      output_dir = pkg_output_dir)               
+```
+
+In general, if the data is originated from R and contains factors,
+using factors_to_codes=TRUE is likely to be easier. 
+
 # Handling Context Documentation
 
+Generating suitably-formatted TIFF files for contextDocumentation is
+beyond the scope of this package and you are advised to consult the
+Danish National Archives copious documentation on this topic. For many
+use-cases the ImageMagick "convert" tool can be used, similar to the following:
 
-# TODO:
+```{sh eval=FALSE}
+  convert -background white -alpha remove -depth 8 -compress lzw\ 
+          -density 300 \
+          source_file.pdf contextDocumentation/docCollection1/1/1.tif
+```
 
-Read in data from FD18005, write to RDS
 
-Construct another data frame referencing the 1st one
+However the process_full_info_package routine will check to see if a
+single contextDocumentation/docCollection1 folder exists, and that it
+contains subdirectories and a single TIF file for each <document>
+entry in contextDocumentationIndex.xml
 
-Write testcases
+If it doesn't find them, a warning will be issued
 
-Check the pkg
+# Limitations and observations
 
-Publish to Github
+* The code on which this package is based has special handling of
+  attributes added by the "haven" package when used to represent data
+  types in SAS, SPSS and STATA in datasets that were subsequently
+  exported to R. While this code has been preserved, it is untested
+  at present as I had no suitable datasets to use as a test case. 
 
-Convert the Interview transcripts
+* Interaction with the tidyverse (specifically tibbles) is untested,
+  but no problems are anticipated
 
-We are done. 
+* Full tests and documentation are NOT YET COMPLETE
+
