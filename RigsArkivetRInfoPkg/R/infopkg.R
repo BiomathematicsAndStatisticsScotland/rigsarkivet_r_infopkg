@@ -1,3 +1,4 @@
+
 ## Constants and data
 #' @include sql_reserved_words.R
 NULL
@@ -122,7 +123,7 @@ default_preprocess_dataset <- function (df,
         if (is_factor && factors_to_codes) {
             ## We're emitting factors as numeric levels and adding them to KODELISTE latere
             ## Type will be converted in variable description as well
-            df[[col_name]] <- as.numeric(df[[col_name]])
+            df[[col_name]] <- as.integer(df[[col_name]])
         } else if (is_factor || is_character) {
 
             ## Remove factors and cleanup all values so they create a
@@ -137,16 +138,25 @@ default_preprocess_dataset <- function (df,
 }
 
 #' check_for_missing_labels
-#'
+#' **
 #' Examines df_desc (obtained using describe_dataset) for missing
 #' label attributes If missing_labels_file is provided, the missing
 #' labels will be written there.  Once edited to include labels, this
 #' file can then be supplied to relabel_dataset to get the dataset
 #' ready for import
 #'
-#' @param df_desc A description of the dataset as returned by describe_dataset
-#' @param missing_labels_file
-#' @return A data frame containing the missing labels, such as would be written to missing_labels_file
+#' @param df_desc A description of the dataset as returned by
+#'     describe_dataset
+#' @param missing_labels_file A file path or connection to which the
+#'     missing labels (if any) will be written in a form suitable for
+#'     passing to relabel_dataset, once the label information has been
+#'     added manual. If NULL no file is written
+#' @return A data frame containing the missing labels, such as would
+#'     be written to missing_labels_file. This can be modified to include labels and passed
+#'     straight to relabel_dataset
+#' @seealso describe_dataset, relabel_dataset
+#'
+#' @importFrom utils write.csv
 #' @export
 check_for_missing_labels <- function( df_desc, missing_labels_file=NULL ) {
     missing_desc = df_desc[df_desc$description %in% c("NULL",""),]
@@ -282,6 +292,7 @@ ensure_file <- function(file_path,
     if (!file.exists(file_path)) {
         if (create_structure) {
             if (!is.null(source_file)) {
+                ensure_directory(dirname(file_path), create_structure=create_structure, warn_only=warn_only)
                 file.copy(source_file, file_path)
             } else {
                 msg = sprintf("Cannot create file %s as no source file is provided", file_path)
@@ -389,6 +400,9 @@ dataset_to_name <- function(dataset_file) {
 #'     Order 128 requires NR2 decimals (ISO-6093-1985) which does not
 #'     allow exponential notation.
 #' @return a dataframe containing the pre-processed dataset
+#'
+#' @importFrom utils write.table
+#' 
 #' @export
 emit_dataset <- function(df,
                          dataset_conn=stdout(),
@@ -403,10 +417,10 @@ emit_dataset <- function(df,
     ## default_sanitise_numeric will also censor certain very small,
     ## precise values as ASTA doesn't like those either. 
     message(sprintf("NOTE: Decimals wider than %d digits will be printed in exponential form.
-      This will result in an ASTA error as Exec Order 128 requires decimals be printed
-      without exponentation. If so, modify option_scipen or filter your dataset to remove
-      such values. A custom sanitise_numeric function will also help", option_scipen))
-    
+      This will result in warnings from this software and an ASTA error as Executive Order 128
+      requires decimals be printed without exponentation. If this occurs, modify
+      option_scipen or filter your dataset to remove such values. A custom sanitise_numeric
+      function will also help", option_scipen))    
             
     df_csv <- preprocess_dataset(df, factors_to_codes=factors_to_codes)
     
@@ -428,7 +442,7 @@ emit_dataset <- function(df,
                     sep       = ";",
                     eol       = "\r\n",
                     row.names = FALSE,
-                    col.name  = TRUE,
+                    col.names = TRUE,
                     quote     = FALSE,
                     na        = "")
         
@@ -893,7 +907,7 @@ emit_metadata_file <- function (df,
     cat(paste(c("SYSTEMNAVN","R","",
                 "DATAFILNAVN",table_info$name,"",
                 "DATAFILBESKRIVELSE", table_info$description,"",
-                "NØGLEVARIABEL", paste(table_info$key_variable,collapse=sep),"",
+                "N\u00D8GLEVARIABEL", paste(table_info$key_variable,collapse=sep),"",
                 "REFERENCE", reference_text,  
                 "VARIABEL",""), collapse=sep),
         file=output_conn)
@@ -937,7 +951,7 @@ emit_metadata_file <- function (df,
         SYSTEMNAVN="R",
         DATAFILNAVN=as.character(table_info$name),
         DATAFILBESKRIVELSE=as.character(table_info$description),
-        NØGLEVARIABEL=as.list(table_info$key_variable),
+        "N\u00D8GLEVARIABEL"=as.list(table_info$key_variable),
         REFERENCE=reference_text,
         VARIABEL=var_list,
         VARIABELBESKRIVELSE=var_desc,
@@ -986,12 +1000,15 @@ load_and_truncate_dataset <- function(source_file, row_limit=NULL) {
         file = readRDS(source_file)
     }
     
-    if (is.integer(row_limit)) {
+    if (is.numeric(row_limit)) {
         if (nrow(file) > row_limit) {
-            message(sprintf("Truncating file %s to first %d rows of %d", source_file, row_limit, nrow(file)))
+            message(sprintf("Truncating file %s to first %d rows of %d",
+                            source_file,
+                            row_limit,
+                            nrow(file)))
 
             ## Subset and preserve attributes. Should really use the "sticky" package for this        
-            new_file = file[1:opt$row_limit, ]
+            new_file = file[1:row_limit, ]
             for (col in colnames(file)) {
                 old_attrs = attributes(file[, col])
                 attributes(new_file[, col]) = old_attrs
@@ -1009,6 +1026,8 @@ load_and_truncate_dataset <- function(source_file, row_limit=NULL) {
 #' @param df The data frame where label attributes will be added
 #' @param label_data  A data frame with two columns, "variable_name" and "description" used to label corresponding variables in df
 #' @return a copy of df containing the relabelled data. Other attributes are preserved
+#'
+#' @importFrom utils read.csv
 #' @export
 relabel_dataset <- function( df, label_data ) {
     ## Do nothing if we have no new labels
@@ -1065,13 +1084,13 @@ verify_named_list <- function(x, list_name, required_params, optional_params, sh
     
     x_names = names(x)
   
-    missing_required = required_params[!(names(required_params) %in% x_names)]
+    missing_required = names(required_params[!(names(required_params) %in% x_names)])
     unknown_params = x_names[!(x_names %in% names(all_params))]
-
+    
     if (length(missing_required) > 0) {
         params_ok=FALSE
         if (show_warnings) {
-            warning(sprintf("Required params %s are missing in %s",
+            warning(sprintf("Required params '%s' are missing in '%s'",
                             paste(missing_required, collapse=","), list_name))
         }
     }
@@ -1079,7 +1098,7 @@ verify_named_list <- function(x, list_name, required_params, optional_params, sh
     if (length(unknown_params) > 0) {
         params_ok=FALSE
         if (show_warnings) {
-            warning(sprintf("Unknown params %s are present in %s",
+            warning(sprintf("Unknown params '%s' are present in '%s'",
                             paste(unknown_params, collapse=","), list_name))
         }
     }
@@ -1142,7 +1161,7 @@ verify_named_list <- function(x, list_name, required_params, optional_params, sh
 #'
 #' @examples
 #'
-#' ```{r, eval=FALSE}
+#' \dontrun{
 #' library(RigsArkivetRInfoPkg)
 #' pkg_output_dir=tempdir()
 #' pkg_descroption = list(
@@ -1172,7 +1191,7 @@ verify_named_list <- function(x, list_name, required_params, optional_params, sh
 #'
 #'  process_full_info_pkg(pkg_description,
 #'                          output_dir = pkg_output_dir)   
-#' ```
+#' }
 #' 
 #' 
 #' @seealso emit_metadata_file, verify_pkg_file_structure
@@ -1372,46 +1391,6 @@ verify_pkg_file_structure <- function(pkg_dir,
                  data_dir= data_dir))
 }
 
-#' check_for_missing_labels
-#'
-#' Checks a data frame description produced by describe_dataset for
-#' any variables/columns with missing labels and either writes them to
-#' a file (missing_labels_file) or simply returns them.
-#'
-#' @param df_desc A data frame description from describe_dataset
-#' @param missing_labels_file A file or connection where the missing
-#'     label(s) will be written. If this parameter is NULL or there
-#'     are no missing labels, no file will be written. Once written
-#'     the file can be edited and fed back in to relabel_dataset
-#' @return a data frame containing the variables with missing
-#'     labels. This can be modified to include labels and passed
-#'     straight to relabel_dataset
-#'
-#' @seealso describe_dataset, relabel_dataset
-#' @export
-check_for_missing_labels <- function( df_desc, missing_labels_file=NULL ) {
-    missing_desc = df_desc[df_desc$description %in% c("NULL",""),]
-    
-    if (!is.null(missing_labels_file)) {
-        if (file.exists(missing_labels_file)) {
-            file.remove(missing_labels_file)
-        }
-        
-        if (nrow(missing_desc) > 0) {
-            warning(sprintf("%d VARIABLES ARE MISSING DESCRIPTIONS. these have been written to %s", nrow(missing_desc), missing_labels_file))
-            write.csv(missing_desc,
-                      file=missing_labels_file,
-                      row.names = FALSE)
-        } else {
-            message(sprintf("No missing labels, skipping writing missing labels file %s", missing_labels_file))
-        }
-    } else if (nrow(missing_desc) > 0) {
-        warning(sprintf("%d VARIABLES ARE MISSING DESCRIPTIONS.", nrow(missing_desc)))
-    }
-    
-    return (missing_desc)
-}
-
 ## End verification functions
 
 ## Master processing functions (the main user entrypoints into the package
@@ -1434,6 +1413,7 @@ check_for_missing_labels <- function( df_desc, missing_labels_file=NULL ) {
 #' my_dataset_KODELISTE.txt
 #' :the code list for all categorical/factor variables in the dataset. Only produced if there are categorical/factor variables and factors_to_codes = TRUE
 #'
+#' @param df The dataset to export
 #' @param f_name A name to use as the basename for all the output files (see above)
 #' @param preprocess_dataset A function to preprocess the dataset to
 #'     remove or correct problem values. An example implementation is
@@ -1640,7 +1620,7 @@ process_full_info_pkg <- function (pkg_description,
                 }
             } else {
                 ## This error should already have been caught but we check again to be sure
-                warning(sprintf("other_dataset '%s' is not a named dataset in the table list", ref_dataset))
+                warning(sprintf("other_dataset '%s' is not a named dataset in the table list", reference_def$other_dataset))
                 references_ok=FALSE
             }
         }
