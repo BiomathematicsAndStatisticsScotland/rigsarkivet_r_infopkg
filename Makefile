@@ -164,6 +164,7 @@ updatebuildstamp:
 
 clean:
 	rm -f roxygenise.Rbatch testme.Rbatch
+	rm -rf ${PACKAGE}/doc
 	rm -f ${PACKAGE}/man/*.Rd
 	rm -f ${PACKAGE}/inst/doc/*.pdf
 	rm -f $(VIGNETTEDIR)/*.aux
