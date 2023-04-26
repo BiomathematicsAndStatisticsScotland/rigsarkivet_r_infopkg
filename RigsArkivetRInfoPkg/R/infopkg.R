@@ -805,8 +805,8 @@ emit_kodeliste <- function(df, kodeliste_conn=stdout(), factors_to_codes = TRUE)
 #'          table_dataset=mtcars,
 #'          reference=list(
 #'            list( other_dataset="some_other_dataset",
-#'                  other_key_variable="other_car_model",
-#'                  our_key_variable="model")
+#'                  other_variable="other_car_model",
+#'                  our_variable="model")
 #'          )
 #'  )
 #' }
@@ -845,14 +845,14 @@ emit_kodeliste <- function(df, kodeliste_conn=stdout(), factors_to_codes = TRUE)
 #' other_dataset
 #' :the "name" used in the table_info definition of the dataset this reference refers to 
 #' 
-#' other_key_variable
-#' :the name of a key variable in the other dataset
+#' other_variable
+#' :the name of a variable in the other dataset. The existence of this variable will be checked when the metadata file is written for the other_dataset
 #' 
-#' our_key_variable
-#' :the name of a key variable in this dataset
+#' our_variable
+#' :the name of a variable in this dataset. The existence of this variable will be checked when the metadata file for this dataset is written
 #' 
 #'
-#' other_key_variable and our_key_variable should be the same
+#' other_variable and our_variable should be the same
 #' information (e.g. an ID number) and can thus be used to form a link
 #'
 #' @section Format of user codes
@@ -894,8 +894,8 @@ emit_metadata_file <- function (df,
         for (ref in table_info$reference) {
             ref_text = sprintf("%s '%s' '%s'",
                                ref$other_dataset,
-                               ref$other_key_variable,
-                               ref$our_key_variable)
+                               ref$other_variable,
+                               ref$our_variable)
             references=append(references, ref_text)
         }
         reference_text=paste(append(references,""), collapse=sep)
@@ -1178,8 +1178,8 @@ verify_named_list <- function(x, list_name, required_params, optional_params, sh
 #'                          reference=list(
 #'                              list(
 #'                                  other_dataset="childrens_pets",
-#'                                  other_key_variable="child_id",
-#'                                  our_key_variable="child_id")
+#'                                  other_variable="child_id",
+#'                                  our_variable="child_id")
 #'                              )
 #'			),
 #'		       list(
@@ -1212,8 +1212,8 @@ verify_pkg_description <- function(pkg_dir, package_description, create_structur
                                  reference="list")    
     
     required_reference_params = list(other_dataset="character",
-                                 other_key_variable="character",
-                                 our_key_variable="character")
+                                 other_variable="character",
+                                 our_variable="character")
     optional_reference_params = list()
 
     ## Validate all names are present/correct in the various bits of the list
@@ -1249,7 +1249,7 @@ verify_pkg_description <- function(pkg_dir, package_description, create_structur
             
                 if (this_ref_ok) {
                      keys_by_other_dataset[reference_def$other_dataset] =
-                         list(reference_def$other_key_variable)
+                         list(reference_def$other_variable)
                    
                 }
             }
@@ -1596,13 +1596,13 @@ process_full_info_pkg <- function (pkg_description,
         for (reference_def in table$reference) {
             ## Check our key variable exists
             our_vars = variables_by_table[[table$name]]
-            if (!reference_def$our_key_variable %in% our_vars) {
+            if (!reference_def$our_variable %in% our_vars) {
                 references_ok=FALSE
 
-                warning(sprintf("Reference from '%s' to '%s': our_key_variable '%s' is not present in columns of %s",
+                warning(sprintf("Reference from '%s' to '%s': our_variable '%s' is not present in columns of %s",
                                 table$name,
                                 reference_def$other_dataset,
-                                reference_def$our_key_variable,
+                                reference_def$our_variable,
                                 table$name))
                 
             }
@@ -1610,12 +1610,12 @@ process_full_info_pkg <- function (pkg_description,
             ## Check our target reference exists in the other table
             other_vars = variables_by_table[[reference_def$other_dataset]]
             if (!is.null(other_vars)) {
-                if (! (reference_def$other_key_variable %in% other_vars)) {
+                if (! (reference_def$other_variable %in% other_vars)) {
                     references_ok=FALSE
-                    warning(sprintf("Reference from '%s' to '%s' other_key_variable '%s' is not present in variables for dataset '%s' ",
+                    warning(sprintf("Reference from '%s' to '%s' other_variable '%s' is not present in variables for dataset '%s' ",
                                     table$name,
                                     reference_def$other_dataset,
-                                    reference_def$other_key_variable,
+                                    reference_def$other_variable,
                                     reference_def$other_dataset))
                 }
             } else {

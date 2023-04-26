@@ -45,8 +45,8 @@ pkg_info = list(
             reference=list(
                 list(
                     other_dataset="childrens_pets",
-                    other_key_variable="child_id",
-                    our_key_variable="child_id")
+                    other_variable="child_id",
+                    our_variable="child_id")
             )
         ),
         list(
