@@ -161,6 +161,16 @@ test_that("Param verification - file structure", {
                                   ),
        "pkg_id is not set and cannot be"
     )
+
+    unlink(pkg_dir, recursive=TRUE)
+    
+    expect_error(
+       verify_pkg_file_structure( file.path(pkg_dir, "FD.18005"),
+                                  archive_index="/tmp/does/not/exist.xml",
+                                  context_doc_index=system.file("extdata", "FD_18005_contextDocumentationIndex.xml", package="RigsArkivetRInfoPkg")
+                                  ),
+       "Creating.*failed"
+    )
 })
 
 test_that("Verify package description", {
@@ -169,5 +179,47 @@ test_that("Verify package description", {
     pkg_dir = file.path( tempdir(), "test_pkg1")
     on.exit({unlink(pkg_dir, recursive=TRUE)})
 
+    good_ref=list(
+                    list(
+                        other_dataset="childrens_pets",
+                        other_variable="child_id",
+                        our_variable="child_id")
+                )
     
+    good_parms=list(
+        archive_index=system.file("extdata", "FD_18005_archiveIndex.xml", package="RigsArkivetRInfoPkg"),
+        context_doc_index=system.file("extdata", "FD_18005_contextDocumentationIndex.xml", package="RigsArkivetRInfoPkg"),
+        pkg_id="FD.18005",
+        tables=list(
+            list(
+                name="R_testfil",
+                label_file=fd_18005_r_labels,                             
+                key_variable=c("child_id"),
+                description="Danish Longitudinal Research Study of Grandparents, Parents and Children - this is data 1",
+                table_dataset=fd_18005_r,
+                reference=good_ref
+            ),
+            list(
+                name="childrens_pets",
+                label_file=example_table2_labels,
+                key_variable=c("pet_id"),
+                description="Childrens' pets, to provide a simple example of a 2nd table",
+                table_dataset=example_table2))
+    )
+    
+    bad_parms1=good_parms
+    bad_parms1$tables[[1]]$table_dataset=97
+    
+    expect_error(
+        expect_warning(verify_pkg_description(pkg_dir, bad_parms1),
+                       "Parameter table_dataset has type numeric but requires type of character,data.frame")
+    )    
+    unlink(pkg_dir, recursive=TRUE)
+    bad_parms1=good_parms
+    bad_parms1$tables[[1]]$reference[[1]]$other_dataset="non_existent"
+    
+    expect_error(
+        expect_warning(verify_pkg_description(pkg_dir, bad_parms1),
+                       "other_dataset 'non_existent' is not a named dataset")
+    )       
 })

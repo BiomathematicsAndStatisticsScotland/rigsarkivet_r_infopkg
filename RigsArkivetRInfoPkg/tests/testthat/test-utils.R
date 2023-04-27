@@ -65,6 +65,7 @@ test_that("File utilities", {
                  NA)
     
     expect_error( ensure_file( other_unexpected_file, create_structure=FALSE))
+    expect_error( ensure_file( other_unexpected_file, create_structure=TRUE, source_file="/tmp/does/not/exist"))
     
 })
 

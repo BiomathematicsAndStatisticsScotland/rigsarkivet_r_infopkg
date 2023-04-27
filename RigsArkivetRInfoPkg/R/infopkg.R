@@ -293,7 +293,9 @@ ensure_file <- function(file_path,
         if (create_structure) {
             if (!is.null(source_file)) {
                 ensure_directory(dirname(file_path), create_structure=create_structure, warn_only=warn_only)
-                file.copy(source_file, file_path)
+                if (!file.copy(source_file, file_path, overwrite=TRUE)) {
+                    msg=sprintf("Creating %s from %s failed", file_path, source_file)
+                }
             } else {
                 msg = sprintf("Cannot create file %s as no source file is provided", file_path)
             }                               
@@ -1588,8 +1590,6 @@ process_full_info_pkg <- function (pkg_description,
         table_count=table_count+1
         message(sprintf("Wrote %s to directory %s", table$name, table_dir))
     }
-
-    #browser()
     
     ## Check our references
     for (table in pkg_description$tables) {
