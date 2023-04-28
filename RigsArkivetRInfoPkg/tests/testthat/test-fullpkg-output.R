@@ -1,5 +1,7 @@
 context("Test emitting in full information package form")
 
+library(tools)
+
 TABLE1_DATA_NOKODES="8201d6041ddcc0a8feba5e7deda94f6a"
 TABLE1_DESC_NOKODES="e25d48df034dff3e5b9d474fb1d8fe37"
 TABLE1_DATA_KODES="51e71b804037b25e6b38eea2f04a322b"
@@ -24,7 +26,6 @@ create_context_docs <- function(ctx_doc_base, ctx_doc_count=7) {
 
 test_that("Single data table package, no codes", {
     pkg_dir=file.path(tempdir(), "full-pkg1", "FD.18005")
-    dir.create(pkg_dir)
     old_enc = options()$encoding
     options(encoding="UTF-8")
     on.exit({
@@ -69,7 +70,6 @@ test_that("Single data table package, no codes", {
 
 test_that("Single data table package, with codes", {
     pkg_dir=file.path(tempdir(), "full-pkg1", "FD.18005")
-    dir.create(pkg_dir)
     old_enc = options()$encoding
     options(encoding="UTF-8")
     on.exit({
@@ -115,7 +115,6 @@ test_that("Single data table package, with codes", {
 
 test_that("Multiple data table package, with codes", {
     pkg_dir=file.path(tempdir(), "full-pkg1", "FD.18005")
-    dir.create(pkg_dir)
     old_enc = options()$encoding
     options(encoding="UTF-8")
     on.exit({
@@ -178,7 +177,6 @@ test_that("Multiple data table package, with codes", {
 
 test_that("Single data table package, missing context docs (check warning)", {
     pkg_dir=file.path(tempdir(), "full-pkg1", "FD.18005")
-    dir.create(pkg_dir)
     old_enc = options()$encoding
     options(encoding="UTF-8")
     on.exit({

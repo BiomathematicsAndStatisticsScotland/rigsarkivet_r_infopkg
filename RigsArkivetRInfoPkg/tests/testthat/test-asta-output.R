@@ -1,5 +1,7 @@
 context("Test emitting in a form suitable for dataset construction in ASTA")
 
+library(tools)
+
 MISSING_LABELS_MD5="b6daea6996dc778157a4c2c094841814"
 KODELISTE_MD5="a9b1beed456dea6f155b78e853ff1925"
 DATASET_NOKODES_MD5="8201d6041ddcc0a8feba5e7deda94f6a"
