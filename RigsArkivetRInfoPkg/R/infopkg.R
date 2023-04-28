@@ -1169,15 +1169,19 @@ verify_named_list <- function(x, list_name, required_params, optional_params, sh
 #' library(RigsArkivetRInfoPkg)
 #' pkg_output_dir=tempdir()
 #' pkg_descroption = list(
-#'     archive_index=system.file("extdata", "FD_18005_archiveIndex.xml", package="RigsArkivetRInfoPkg"),
-#'     context_doc_index=system.file("extdata", "FD_18005_contextDocumentationIndex.xml", package="RigsArkivetRInfoPkg"),
+#'     archive_index=system.file("extdata",
+#'                               "FD_18005_archiveIndex.xml",
+#'                               package="RigsArkivetRInfoPkg"),
+#'     context_doc_index=system.file("extdata",
+#'                                   "FD_18005_contextDocumentationIndex.xml",
+#'                                   package="RigsArkivetRInfoPkg"),
 #'     pkg_id="FD.18005",
 #'                  tables=list(
 #'                     list(
 #'                       name="R_testfil",
 #'                          label_file=fd_18005_r_labels,                             
 #'                          key_variable=c("child_id"),
-#'                          description="Danish Longitudinal Research Study of Grandparents, Parents and Children - this is data 1",
+#'                          description="this is data 1",
 #'                          table_dataset=fd_18005_r,
 #'                          reference=list(
 #'                              list(
@@ -1190,7 +1194,7 @@ verify_named_list <- function(x, list_name, required_params, optional_params, sh
 #'                          name="childrens_pets",
 #'                          label_file=example_table2_labels,
 #'                          key_variable=c("pet_id"),
-#'                          description="Childrens' pets, to provide a simple example of a 2nd table",
+#'                          description="Childrens' pets - a simple example of a 2nd table",
 #'                          table_dataset=example_table2)))
 #'
 #'  process_full_info_pkg(pkg_description,

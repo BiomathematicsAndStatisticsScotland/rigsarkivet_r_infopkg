@@ -18,7 +18,7 @@ Description: This package is an aid to those submitting information
    and contextDocumentationIndex.xml file. All may be obtained from
    the National Archives.
 NeedsCompilation: no
-License: BSD | file LICENSE
+License: BSD_3_clause | file LICENSE
 Encoding: UTF-8
 LazyData: true
 Suggests: 
