@@ -138,7 +138,7 @@ default_preprocess_dataset <- function (df,
 }
 
 #' check_for_missing_labels
-#' **
+#' 
 #' Examines df_desc (obtained using describe_dataset) for missing
 #' label attributes If missing_labels_file is provided, the missing
 #' labels will be written there.  Once edited to include labels, this
@@ -1401,7 +1401,7 @@ verify_pkg_file_structure <- function(pkg_dir,
 #'
 #' Export the data frame provided "just like" the original ASTA R
 #' export script. Assuming the name provided to parameter f_name is
-#' "my_dataset" this will output 3, possibly 4 files:
+#' "my_dataset" this will output 3, possibly 5 files:
 #'
 #' my_dataset.csv
 #' :a CSV file produced by emit_dataset
@@ -1414,6 +1414,9 @@ verify_pkg_file_structure <- function(pkg_dir,
 #' 
 #' my_dataset_KODELISTE.txt
 #' :the code list for all categorical/factor variables in the dataset. Only produced if there are categorical/factor variables and factors_to_codes = TRUE
+#'
+#' my_dataset_missing_labels.csv
+#' :If any labels are missing, this file will be written. If the file is present and no labels are missing (e.g. when rerunning the function after labelling the contents of 'df', the file will be removed)
 #'
 #' @param df The dataset to export
 #' @param f_name A name to use as the basename for all the output files (see above)
@@ -1449,43 +1452,50 @@ process_as_asta_export_script <- function(df,
                                           output_dir=getwd(),
                                           factors_to_codes=TRUE){
 
-  if (options()$encoding!="UTF-8") {
-      warning(sprintf("ASTA expects all files to be UTF-8 encoded. Running with encoding %s is unsupported", options()$encoding))
-  }
+    if (options()$encoding!="UTF-8") {
+        warning(sprintf("ASTA expects all files to be UTF-8 encoded. Running with encoding %s is unsupported", options()$encoding))
+    }
     
-  df = load_and_truncate_dataset(df, row_limit)
+    df = load_and_truncate_dataset(df, row_limit)
     
-  ## Write out the dataset itself
-  emit_dataset(df,
-               file.path(output_dir,
-                         paste0(f_name, ".csv")),
-               factors_to_codes=factors_to_codes,               
-               preprocess_dataset=preprocess_dataset,
-               option_scipen=option_scipen) 
-
-  ## Write the variable list
-  ## N.B. this will write empty files which may not be what we want
-  ## Could pass in filename and detect type inside the function (connection-or-filename)
-  emit_variable_list(df,
-                     file.path(output_dir, paste0(f_name, "_", "VARIABEL.txt")),
-                     factors_to_codes=factors_to_codes)
-
-  ## Write the variable descriptions file
-  emit_variable_descriptions(df,
-                             file.path(output_dir,
-                                       paste0(f_name, "_", "VARIABELBESKRIVELSE.txt")
-                                       ),
-                             sanitise_numeric=sanitise_numeric,
-                             sanitise_character=sanitise_character)
-
-  ## Write the code list
-  emit_kodeliste(df,
+    ## Write out the dataset itself
+    emit_dataset(df,
                  file.path(output_dir,
-                           paste0(f_name, "_", "KODELISTE.txt")),
-                 factors_to_codes=factors_to_codes)    
-  
-  message(sprintf("Data processing succesfully completed - emitted dataset of %d rows with %d variables", nrow(df), ncol(df)))
-  
+                           paste0(f_name, ".csv")),
+                 factors_to_codes=factors_to_codes,               
+                 preprocess_dataset=preprocess_dataset,
+                 option_scipen=option_scipen) 
+
+    ## Write the variable list
+    ## N.B. this will write empty files which may not be what we want
+    ## Could pass in filename and detect type inside the function (connection-or-filename)
+    emit_variable_list(df,
+                       file.path(output_dir, paste0(f_name, "_", "VARIABEL.txt")),
+                       factors_to_codes=factors_to_codes)
+
+    ## Write the missing labels file, ensuring we don't have any stale files
+    missing_labels_file = file.path(output_dir, sprintf("%s_missing_labels.csv", f_name))
+    unlink(missing_labels_file)
+    
+    df_description = describe_dataset(df)
+    check_for_missing_labels( df_description, missing_labels_file)
+    
+    ## Write the variable descriptions file
+    emit_variable_descriptions(df,
+                               file.path(output_dir,
+                                         paste0(f_name, "_", "VARIABELBESKRIVELSE.txt")
+                                         ),
+                               sanitise_numeric=sanitise_numeric,
+                               sanitise_character=sanitise_character)
+
+    ## Write the code list
+    emit_kodeliste(df,
+                   file.path(output_dir,
+                             paste0(f_name, "_", "KODELISTE.txt")),
+                   factors_to_codes=factors_to_codes)    
+    
+    message(sprintf("Data processing succesfully completed - emitted dataset of %d rows with %d variables", nrow(df), ncol(df)))
+    
 }
 
 #' process_info_pkg
