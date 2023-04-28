@@ -15,7 +15,7 @@ PKG_PATTERN="FD.(\\d+)"
 #' @param x Value to quote
 #' @return Quoted value
 quote_value <- function(x){
-  return(paste0("'", x, "'"))
+    return(paste0("'", x, "'"))
 }
 
 
@@ -292,7 +292,9 @@ ensure_file <- function(file_path,
     if (!file.exists(file_path)) {
         if (create_structure) {
             if (!is.null(source_file)) {
-                ensure_directory(dirname(file_path), create_structure=create_structure, warn_only=warn_only)
+                ensure_directory(dirname(file_path),
+                                 create_structure=create_structure,
+                                 warn_only=warn_only)
                 if (!file.copy(source_file, file_path, overwrite=TRUE)) {
                     msg=sprintf("Creating %s from %s failed", file_path, source_file)
                 }
@@ -1498,7 +1500,7 @@ process_as_asta_export_script <- function(df,
     
 }
 
-#' process_info_pkg
+#' process_full_info_pkg
 #' 
 #' Write the overall metadata file and assemble the whole package as
 #' described in section 9I of exec order 128. This accounts for
