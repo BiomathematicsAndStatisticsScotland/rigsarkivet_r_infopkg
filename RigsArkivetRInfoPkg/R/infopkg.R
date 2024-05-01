@@ -513,7 +513,7 @@ emit_variable_list <- function (df, variabel_conn=stdout(), factors_to_codes=TRU
             } else if ("times" %in% col_classes) {
                 variabel_i <- paste(col, "time")
                 
-            }else if ("POSIXct" %in% col_classes) {
+            } else if ("POSIXct" %in% col_classes) {
                 variabel_i <- paste(col, "datetime")
                 
             } else if ("double" %in% col_classes) {
@@ -525,6 +525,8 @@ emit_variable_list <- function (df, variabel_conn=stdout(), factors_to_codes=TRU
             } else if ("integer" %in% col_classes) {
                 variabel_i <- paste(col, "int")
                 
+            } else if ("logical" %in% col_classes) {
+                variabel_i <- paste(col, "boolean")
             } else {
                 variabel_i <- paste(col, "string")
             }
@@ -573,7 +575,8 @@ emit_variable_list <- function (df, variabel_conn=stdout(), factors_to_codes=TRU
             }
         } else if (!is.null(attributes(df[[col]])$labels)){
             ## Note: If "labels" are attached to column, but not haven_labelled class
-            ## Not sure how this interacts with the work done in part 1) above...  
+            ## Not sure how this interacts with the work done in part 1) above...
+
             if (fmt=="sas"){
                 
                 if ("Date" %in% col_classes) {
@@ -597,6 +600,8 @@ emit_variable_list <- function (df, variabel_conn=stdout(), factors_to_codes=TRU
                 } else if ("integer" %in% col_classes){
                     variabel_i <- paste(col, "int", paste0(attributes(df[[col]])$format.sas,"."))
                     
+                } else if ("logical" %in% col_classes) {
+                    variabel_i <- paste(col, "boolean", paste0(attributes(df[[col]])$format.sas,"."))
                 } else {
                     variabel_i <- paste(col, "string", paste0(attributes(df[[col]])$format.sas,"."))
                 }                           
